@@ -1,0 +1,178 @@
+:root {
+    --page-width:  calc(50vw);
+    --page-height: calc(var(--page-width) * 8.5/11);
+
+    /*
+      The number of millimeters in the margin. This variable omits the unit so
+      that it can be used with different levels of scaling.
+
+      The number 279.4 is the number of millimeters in 11 inches.
+    */
+    --crease-margin-quantity: 1;
+    --crease-margin-real:     calc(var(--crease-margin-quantity) * 1mm);
+    --crease-margin:          calc(var(--crease-margin-quantity) * var(--page-width) / 279.4);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  max-width: 100vw;
+  height: 100vh;
+  margin: 0;
+
+  display: grid;
+  grid-template-columns: [controls] 300px [pages] auto;
+  grid-template-rows:    [controls pages] auto;
+
+  font-family: Sans-Serif;
+
+  background: #bbb;
+  background: linear-gradient(#bbb, #999);
+  background-attachment: fixed;
+}
+
+.pages {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100%;
+  width: 100%;
+}
+
+.scroll {
+    overflow-y: scroll;
+    height: 100%;
+    max-height: 100vh;
+}
+
+.controls {
+    background:    #eee;
+    padding:       1em;
+    grid-area: controls;
+    box-shadow: #0004 3px 0px 5px;
+    z-index: 1;
+    border-radius: 2px;
+    line-height: 1.75em;
+}
+
+input[type="checkbox"],
+input[type="checkbox"] + label {
+  font-size: 0.8em;
+  vertical-align: middle;
+}
+
+input[type="file"] {
+  word-wrap: break-word;
+  max-width: 100%;
+}
+
+input#crease-margin {
+  direction: rtl;
+  text-align: right;
+  padding-right: 40px;
+  width: 100%;
+}
+
+input#crease-margin+span {
+  margin-left: -45px;
+}
+
+body > .scroll {
+  grid-area: pages;
+}
+
+
+.spread {
+  display: grid;
+  grid-template-columns: 100%;
+  grid-template-rows:    100%;
+
+  width: var(--page-width);
+  height: var(--page-height);
+
+  overflow:hidden;
+  page-break-after: always;
+  margin: 2rem 0;
+  background: white;
+  box-shadow: #00000088 2px 5px 5px;
+}
+
+.spread > .spread-page {
+  grid-column: 1;
+  grid-row: 1;
+  display: flex;
+  flex-direction: row;
+  justify-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.spread-page > img.single {
+  width: calc(50% - var(--crease-margin));
+  max-width: 50%;
+}
+
+.spread-page.spread-right > img.single {
+  margin-left: calc(50% + var(--crease-margin));
+}
+
+.spread-page.spread-left > img.double {
+  object-position: calc(-1 * var(--crease-margin));
+  clip-path: polygon(0% 0%, 50% 0%, 50% 100%, 0% 100%);
+}
+
+.spread-page.spread-right > img.double {
+  object-position: calc(100% + var(--crease-margin));
+  clip-path: polygon(50% 0%, 100% 0%, 100% 100%, 50% 100%);
+}
+
+.spread-page > img {
+  width: 100%;
+  object-fit: contain;
+  background: white;
+}
+
+#imposed-pages {
+  display: none;
+}
+
+
+@media print {
+  body      {
+    display: block;
+    background: white;
+  }
+
+  .controls { display: none;  }
+  .upload   { display: none;  }
+
+  :root {
+      --page-width:  100vw;
+      --page-height: 100vh;
+      --crease-margin: calc(var(--crease-margin-real));
+  }
+
+  .scroll {
+      max-height: unset;
+      overflow-y: unset;
+  }
+
+  .pages {
+    display: block;
+    background: white;
+  }
+
+  .pages > * > h2 {
+    display: none;
+  }
+
+  .spread {
+    box-shadow:    unset;
+    border-radius: unset;
+  }
+  
+  /*
+  #real-pages { display: none; }
+  #imposed-pages { display: block; }
+  */
+}
