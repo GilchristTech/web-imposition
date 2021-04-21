@@ -106,6 +106,7 @@ class ImpositionBook {
   }
 
   refreshImposed () {
+    return;
     this.imposed_page.innerHTML = "";
 
     this.sheets = Array(Math.ceil(this.spreads.length / 2));
@@ -179,5 +180,20 @@ window.onload = function() {
   document.getElementById("crease-margin").onchange = function(e) {
     this.value = parseFloat(this.value).toFixed(1);
     setMargin(e.target.value);
+  };
+
+  function handleViewChange (e) {
+    if (e.target.id == "select-real-view") {
+      book.real_pages.classList.remove('hidden');
+      book.imposed_pages.classList.add('hidden');
+    }
+    else {
+      book.real_pages.classList.add('hidden');
+      book.imposed_pages.classList.remove('hidden');
+    }
   }
+
+  document.getElementById("select-real-view").onchange = handleViewChange;
+  document.getElementById("select-imposed-view").onchange = handleViewChange;
+
 }

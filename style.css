@@ -31,6 +31,10 @@ body {
   background-attachment: fixed;
 }
 
+.hidden {
+  display: none !important;
+}
+
 .pages {
   display: flex;
   flex-direction: column;
@@ -131,11 +135,6 @@ body > .scroll {
   object-fit: contain;
   background: white;
 }
-
-#imposed-pages {
-  display: none;
-}
-
 
 @media print {
   body      {

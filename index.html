@@ -32,17 +32,17 @@
     <ol id="page-editor-list"></ol>
 
     Page Preview:<br/>
-    <input id="real-view" type="radio" name="page-view" checked>
-    <label for="real-view">Real View</label>
-    <input id="imposed-view" type="radio" name="page-view">
-    <label for="imposed-view">Imposed View</label>
+    <input autocomplete="off" id="select-real-view" type="radio" name="select-page-view" checked>
+    <label for="select-real-view">Real View</label>
+    <input autocomplete="off" id="select-imposed-view" type="radio" name="select-page-view">
+    <label for="select-imposed-view">Imposed View</label>
 
     <button onclick="window.print()">Save/Print</button>
   </div>
   
   <div class="scroll">
     <div class="pages" id="real-pages"></div>
-    <div class="pages" id="imposed-pages"></div>
+    <div class="pages hidden" id="imposed-pages"></div>
   </div>
 
 </body>
