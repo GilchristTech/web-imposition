@@ -71,6 +71,7 @@ class ImpositionBook {
 	else {
 	  spread = document.createElement("div");
 	  spread.className = "spread";
+	  spread.id = `spread${spreads.length}`;
 	  this.real_pages.appendChild(spread);
 	  spreads.push(spread);
 	}
@@ -79,6 +80,7 @@ class ImpositionBook {
 
 	const page = document.createElement("div");
 	page.className = `spread-page spread-${page_side}`;
+	page.id = `page${this.pages.length}`;
 	page.appendChild(image.element);
 	spread.appendChild(page);
 
@@ -105,11 +107,35 @@ class ImpositionBook {
 	spread.appendChild(page_l);
 	spread.appendChild(page_r);
 
+	page_l.id = `page${this.pages.length}`;
 	this.pages.push(page_l);
+	page_r.id = `page${this.pages.length}`;
 	this.pages.push(page_r);
 
 	side = 0;
       }
+    }
+
+    // Append pages until the number of pages is divisible by four
+
+    while (this.pages.length % 4) {
+      // If the page is even, then start a new page
+      if (this.pages.length % 2 == 0) {
+	const new_spread = document.createElement("div");
+	new_spread.className = "spread";
+	this.spreads.push(new_spread);
+	this.real_pages.appendChild(new_spread);
+      }
+
+      const spread           = this.spreads[this.spreads.length - 1];
+      const blank_page       = document.createElement("div");
+      const page_side_number = this.pages.length % 2;
+      const page_side_name   = (page_side_number ^ this.right_to_left) ? "left" : "right";
+      blank_page.className   = `spread-page page-${page_side_name}`;
+      blank_page.id = `page${this.pages.length}`;
+      
+      this.pages.push(blank_page);
+      spread.appendChild(blank_page);
     }
   }
 
@@ -140,16 +166,16 @@ class ImpositionBook {
       if (imposed_spread_i % 2) {
 	[left_src_i, right_src_i] = [right_src_i, left_src_i];
       }
-      
+  
       const    left_source_spread = this.spreads[left_src_i  >> 1];
       const   right_source_spread = this.spreads[right_src_i >> 1];
-      
+  
       const      left_source_side = (left_src_i  % 2) ? "left" : "right";
       const     right_source_side = (right_src_i % 2) ? "left" : "right";
 
       const  left_source_element  =  left_source_spread.getElementsByClassName(`spread-${ left_source_side}`)[0];
       const right_source_element  = right_source_spread.getElementsByClassName(`spread-${right_source_side}`)[0];
-      
+ 
       // Create return elements
 
       const imposed_spread_element = document.createElement("div");
