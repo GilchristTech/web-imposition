@@ -90,6 +90,12 @@ body > .scroll {
 }
 
 #pages-welcome {
+  text-align: center;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  color: #666;
 }
 
 .spread {

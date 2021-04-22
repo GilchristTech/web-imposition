@@ -287,9 +287,9 @@ function processUpload (file) {
   });
 }
 
-function uploaderHook (uploader) {
-  Promise.all(
-    Array.from(uploader.files).map(processUpload)
+function uploadFiles (files) {
+  return Promise.all(
+    Array.from(files).map(processUpload)
   ).then( ()=> {
     book.refresh();
     
@@ -304,8 +304,22 @@ function uploaderHook (uploader) {
   });
 }
 
+function uploaderHook (uploader) {
+  return uploadFiles(uploader.files);
+}
 
-window.onload = function() {
+// Dragging and dropping files into the window
+
+window.ondragover = function (event) {
+  event.preventDefault();
+}
+
+window.ondrop = function (event) {
+  event.preventDefault();
+  uploadFiles(event.dataTransfer.files);
+}
+
+window.addEventListener("load", () => {
   book.real_pages = document.getElementById("real-pages");
   book.imposed_pages = document.getElementById("imposed-pages");
 
@@ -334,4 +348,4 @@ window.onload = function() {
   document.getElementById("select-real-view").onchange = handleViewChange;
   document.getElementById("select-imposed-view").onchange = handleViewChange;
 
-}
+});
