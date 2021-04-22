@@ -40,6 +40,7 @@ class ImpositionBook {
     
     // Manga-order imposition flag
     this.right_to_left = false;
+    this.has_back_cover    = true;
   }
 
   refresh () {
@@ -61,7 +62,14 @@ class ImpositionBook {
     this.pages = [];
     let side = 1;
 
-    for (let image of this.images) {
+    for (let [images_i, image] of Object.entries(this.images)) {
+
+      // If this is the back cover and we have the back cover enabled, break,
+      // and don't generate it in this loop.
+      if (this.has_back_cover && images_i == this.images.length - 1) {
+	break;
+      }
+
       let spread;
 
       if (image.single) {
@@ -116,12 +124,32 @@ class ImpositionBook {
       }
     }
 
-    // Append pages until the number of pages is divisible by four
+    /*
+      Append filler pages until the number of pages is divisible by four
+    */
+    
+    let postfiller_page_length;
 
-    while (this.pages.length % 4) {
+    if (this.has_back_cover) {
+      postfiller_page_length = (
+	/* # of sheets         */ ((this.pages.length + 3) >> 2)
+	/* # of pages, rounded */ * 4
+	/* reserve back cover  */ - 1
+      );
+    }
+    else {
+      postfiller_page_length = (
+	/* Fill extra pages until */ (
+	/* back cover is blank.   */   (this.pages.length + 4)
+	/* From that, # of sheets */   >> 2
+	/* Round to # of pages    */ ) * 4
+      );
+    }
+
+    while (this.pages.length < postfiller_page_length) {
       // If the page is even, then start a new page
       if (this.pages.length % 2 == 0) {
-	const new_spread = document.createElement("div");
+	const new_spread     = document.createElement("div");
 	new_spread.className = "spread";
 	this.spreads.push(new_spread);
 	this.real_pages.appendChild(new_spread);
@@ -130,12 +158,29 @@ class ImpositionBook {
       const spread           = this.spreads[this.spreads.length - 1];
       const blank_page       = document.createElement("div");
       const page_side_number = this.pages.length % 2;
-      const page_side_name   = (page_side_number ^ this.right_to_left) ? "left" : "right";
-      blank_page.className   = `spread-page page-${page_side_name}`;
-      blank_page.id = `page${this.pages.length}`;
+      const page_side_name   = (page_side_number ^ this.right_to_left) ? "right" : "left";
+      blank_page.className   = `spread-page spread-${page_side_name}`;
+      blank_page.id          = `page${this.pages.length}`;
       
       this.pages.push(blank_page);
       spread.appendChild(blank_page);
+    }
+
+    if (this.has_back_cover) {
+      const spread     = document.createElement("div");
+      spread.className = "spread";
+      spread.id        = `spread${this.spreads.length}`;
+      this.spreads.push(spread);
+      this.real_pages.appendChild(spread);
+
+      const page       = document.createElement("div");
+      const page_side  = (this.right_to_left) ? "right" : "left";
+      page.id          = `pages${this.pages.length}`;
+      page.className   = `spread-page spread-${page_side}`;
+
+      page.appendChild(this.images[this.images.length - 1].element);
+      spread.appendChild(page);
+      this.pages.push(page);
     }
   }
 
@@ -344,6 +389,11 @@ window.addEventListener("load", () => {
 
   document.getElementById("right-to-left").onchange = function(e) {
     book.right_to_left = e.target.checked;
+    book.refresh();
+  };
+
+  document.getElementById("back-cover-toggle").onchange = function(e) {
+    book.has_back_cover = e.target.checked;
     book.refresh();
   };
 
