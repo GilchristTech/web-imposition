@@ -30,13 +30,15 @@ class ImpositionImage {
 
 class ImpositionBook {
   constructor () {
-    this.images  = [];
-    this.spreads = [];
-    this.pages   = [];
+    this.images        =    [];
+    this.spreads       =  null;
+    this.pages         =  null;
     
-    this.real_pages    = null;
-    this.imposed_pages = null;
-
+    // DOM elements containing individual page spreads
+    this.real_pages    =  null;
+    this.imposed_pages =  null;
+    
+    // Manga-order imposition flag
     this.right_to_left = false;
   }
 
@@ -56,6 +58,7 @@ class ImpositionBook {
     // Create page spread elements
 
     const spreads = this.spreads = [];
+    this.pages = [];
     let side = 1;
 
     for (let image of this.images) {
@@ -79,6 +82,8 @@ class ImpositionBook {
 	page.appendChild(image.element);
 	spread.appendChild(page);
 
+	this.pages.push(page);
+
 	side = !side;
       }
       else {
@@ -100,16 +105,93 @@ class ImpositionBook {
 	spread.appendChild(page_l);
 	spread.appendChild(page_r);
 
+	this.pages.push(page_l);
+	this.pages.push(page_r);
+
 	side = 0;
       }
     }
   }
 
   refreshImposed () {
-    return;
-    this.imposed_page.innerHTML = "";
+    this.imposed_pages.innerHTML = "";
+    this.mapImposedSpreads( (spread) => this.imposed_pages.appendChild(spread) );
+  }
+  
+  imposedSliceSpreads (start, end) {
+    const imposed_spreads = Array(this.pages.length >> 1);
 
-    this.sheets = Array(Math.ceil(this.spreads.length / 2));
+    // This imposition algorithm iterates through real-flow (as seen by the
+    // reader) of page spreads, and uses that spread's index for calculation.
+
+    for (
+	let imposed_spread_i=0 ;
+	imposed_spread_i < this.pages.length / 2 ;
+	imposed_spread_i++
+    ) {
+      let            left_src_i  = this.pages.length - 1 - imposed_spread_i;
+      let           right_src_i  = imposed_spread_i;
+      
+      // Depending on whether this page spread is on the front or the back of
+      // the sheet, the left and right pages will alternate from taking from the
+      // first or second half of the source page flow. So every other page, we
+      // swap source indexes.
+
+      if (imposed_spread_i % 2) {
+	[left_src_i, right_src_i] = [right_src_i, left_src_i];
+      }
+      
+      const    left_source_spread = this.spreads[left_src_i  >> 1];
+      const   right_source_spread = this.spreads[right_src_i >> 1];
+      
+      const      left_source_side = (left_src_i  % 2) ? "left" : "right";
+      const     right_source_side = (right_src_i % 2) ? "left" : "right";
+
+      const  left_source_element  =  left_source_spread.getElementsByClassName(`spread-${ left_source_side}`)[0];
+      const right_source_element  = right_source_spread.getElementsByClassName(`spread-${right_source_side}`)[0];
+      
+      // Create return elements
+
+      const imposed_spread_element = document.createElement("div");
+      imposed_spread_element.className = "spread";
+
+      let  left_imposed_element, right_imposed_element;
+
+      if (left_source_element) {
+	left_imposed_element = left_source_element.cloneNode(true);
+	imposed_spread_element.appendChild(left_imposed_element);
+      }
+
+      if (right_source_element) {
+	right_imposed_element = right_source_element.cloneNode(true);
+	imposed_spread_element.appendChild(right_imposed_element);
+      }
+
+      imposed_spreads[imposed_spread_i] = imposed_spread_element;
+    }
+
+    return imposed_spreads;
+  }
+
+  mapImposedSpreads (start, end, func) {
+    /*
+      Map a function over this.real_pages.slice(start, end) in imposed order.
+      The start and end arguments are optional, and default to the start and end
+      of this.real_pages.
+    */
+
+    // Process aruments based on length
+
+    switch (arguments.length) {
+      case 1: [ func, start, end ] = [ start,     0, undefined ]; break;
+      case 2: [ func, start, end ] = [   end, start, undefined ]; break;
+      case 3:           /* works as specified */                  break;
+
+      default:
+	throw TypeError("ImpositionBooklet.mapImposed() expects 1 to 3 arguments, got " + aguments.length);
+    }
+
+    return this.imposedSliceSpreads(start, end).map(func);
   }
 }
 
