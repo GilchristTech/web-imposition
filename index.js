@@ -151,7 +151,7 @@ class ImpositionBook {
     // reader) of page spreads, and uses that spread's index for calculation.
 
     for (
-	let imposed_spread_i=0 ;
+	let imposed_spread_i = 0 ;
 	imposed_spread_i < this.pages.length / 2 ;
 	imposed_spread_i++
     ) {
@@ -170,11 +170,11 @@ class ImpositionBook {
       const    left_source_spread = this.spreads[left_src_i  >> 1];
       const   right_source_spread = this.spreads[right_src_i >> 1];
   
-      const      left_source_side = (left_src_i  % 2) ? "left" : "right";
-      const     right_source_side = (right_src_i % 2) ? "left" : "right";
+      const      left_source_side = (left_src_i  % 2)^this.right_to_left ? "left" : "right";
+      const     right_source_side = (right_src_i % 2)^this.right_to_left ? "left" : "right";
 
-      const  left_source_element  =  left_source_spread.getElementsByClassName(`spread-${ left_source_side}`)[0];
-      const right_source_element  = right_source_spread.getElementsByClassName(`spread-${right_source_side}`)[0];
+      const  left_source_element  = this.pages[left_src_i];
+      const right_source_element  = this.pages[right_src_i];
  
       // Create return elements
 
