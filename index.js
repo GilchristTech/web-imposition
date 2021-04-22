@@ -224,7 +224,7 @@ class ImpositionBook {
 const book = new ImpositionBook();
 
 function processZip (zipfile) {
-  JSZip.loadAsync(zipfile).then( (zip) => {
+  return JSZip.loadAsync(zipfile).then( (zip) => {
 
     const images = book.images = [];
     const promises = [];
@@ -234,22 +234,20 @@ function processZip (zipfile) {
       images.push(img);
       
       const promise = file.async("blob").then( (blob) => {
-	const url = URL.createObjectURL(blob);
+	const content = URL.createObjectURL(blob);
 
 	return new Promise( (resolve, reject) => {
 	  img.element = document.createElement("img");
 	  img.element.addEventListener('load', () => { img.onload(); return resolve() });
 	  img.element.addEventListener('error', (error)=> reject(error));
-	  img.src = img.element.src = url;
+	  img.src = img.element.src = content;
 	});
       });
 
       promises.push(promise);
     });
     
-    Promise.all(promises).then( () => {
-      book.refresh();
-    });
+    return Promise.all(promises);
 
   }, function zipReadError(err) {
       // TODO
@@ -257,22 +255,44 @@ function processZip (zipfile) {
   
 }
 
+function processImage (file, refresh=true) {
+  return new Promise( (resolve, reject) => {
+    const img     = new ImpositionImage();
+    const content = URL.createObjectURL(file);
+    img.element   = document.createElement("img");
+    img.element.src = content;
+
+    book.images.push(img);
+
+    img.element.addEventListener('load', () => {
+      img.onload();
+      return resolve();
+    });
+
+    img.element.addEventListener('error', (error) => reject(error));
+  });
+}
+
 
 function processUpload (file) {
-  switch (file.type) {
-    case "application/zip":
-      return processZip(file);
-    case "application/img":
-      return null;
-    default:
-      return null;
+  if (file.type == "application/zip") {
+    return processZip(file);
   }
+  else if (file.type.startsWith("image/")) {
+    return processImage(file);
+  }
+
+  const wrong_MIME_promise = new Promise( (resolve, reject) => {
+    return reject(`Expected MIME type of application/zip or image/*, got ${file.type}`);
+  });
 }
 
 function uploaderHook (uploader) {
-  for (let file of uploader.files) {
-    processUpload(file);
-  }
+  Promise.all(
+    Array.from(uploader.files).map(processUpload)
+  ).then( ()=> {
+    book.refresh();
+  });
 }
 
 
