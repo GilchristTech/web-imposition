@@ -81,10 +81,16 @@ input#crease-margin+span {
   margin-left: -45px;
 }
 
+input[disabled]+label {
+  color: #aaa;
+}
+
 body > .scroll {
   grid-area: pages;
 }
 
+#pages-welcome {
+}
 
 .spread {
   display: grid;

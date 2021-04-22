@@ -292,6 +292,15 @@ function uploaderHook (uploader) {
     Array.from(uploader.files).map(processUpload)
   ).then( ()=> {
     book.refresh();
+    
+    // Enable page view buttons and select one
+
+    const select_real_view    = document.getElementById("select-real-view");
+    const select_imposed_view = document.getElementById("select-imposed-view");
+
+    select_real_view.removeAttribute("disabled");
+    select_imposed_view.removeAttribute("disabled");
+    select_real_view.click();
   });
 }
 
@@ -311,6 +320,7 @@ window.onload = function() {
   };
 
   function handleViewChange (e) {
+    document.getElementById("pages-welcome").classList.add("hidden");
     if (e.target.id == "select-real-view") {
       book.real_pages.classList.remove('hidden');
       book.imposed_pages.classList.add('hidden');
