@@ -152,8 +152,8 @@ body > .scroll {
   }
 
   .scroll {
-      max-height: unset;
-      overflow-y: unset;
+    max-height: unset;
+    overflow-y: unset;
   }
 
   .pages {
@@ -166,12 +166,8 @@ body > .scroll {
   }
 
   .spread {
+    margin:            0;
     box-shadow:    unset;
     border-radius: unset;
   }
-  
-  /*
-  #real-pages { display: none; }
-  #imposed-pages { display: block; }
-  */
 }
