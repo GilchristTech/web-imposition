@@ -277,6 +277,7 @@ function processImage (file, refresh=true) {
   return new Promise( (resolve, reject) => {
     const img     = new ImpositionImage();
     const content = URL.createObjectURL(file);
+    img.src = content;
     img.element   = document.createElement("img");
     img.element.src = content;
 
