@@ -141,7 +141,25 @@ class ImpositionBook {
 
   refreshImposed () {
     this.imposed_pages.innerHTML = "";
-    this.mapImposedSpreads( (spread) => this.imposed_pages.appendChild(spread) );
+
+    let last_sheet = null;
+    
+    // Group groups of two spreads each into sheets
+
+    this.mapImposedSpreads( (spread) => {
+      let sheet = last_sheet;
+
+      if (last_sheet === null) {
+	const new_sheet = document.createElement("div");
+	new_sheet.className = "sheet";
+	this.imposed_pages.appendChild(new_sheet);
+	sheet = new_sheet;
+      }
+
+      sheet.appendChild(spread)
+      
+      last_sheet = (last_sheet === null) ? sheet : null;
+    });
   }
   
   imposedSliceSpreads (start, end) {

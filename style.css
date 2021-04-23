@@ -113,6 +113,14 @@ body > .scroll {
   box-shadow: #00000088 2px 5px 5px;
 }
 
+.sheet > .spread {
+  margin: 4px 0;
+}
+
+.sheet {
+  margin: 2rem 0;
+}
+
 .spread > .spread-page {
   grid-column: 1;
   grid-row: 1;
