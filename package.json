@@ -1,0 +1,24 @@
+{
+  "name": "web-imposition",
+  "version": "1.0.0",
+  "description": "A web-based booklet imposition tool.",
+  "main": "index.js",
+  "scripts": {
+    "build": "npx webpack",
+    "start": "npx webpack serve --open"
+  },
+  "author": "Gilchrist Pitts",
+  "license": "ISC",
+  "devDependencies": {
+    "copy-webpack-plugin": "^9.0.0",
+    "css-loader": "^5.2.5",
+    "html-webpack-plugin": "^5.3.1",
+    "style-loader": "^2.0.0",
+    "webpack": "^5.37.1",
+    "webpack-cli": "^4.7.0",
+    "webpack-dev-server": "^3.11.2"
+  },
+  "dependencies": {
+    "jszip": "^3.6.0"
+  }
+}

@@ -1,3 +1,5 @@
+import * as JSZip from 'jszip';
+
 function setMargin (margin) {
   document.documentElement.style.setProperty('--crease-margin-quantity', margin);
 }
@@ -371,6 +373,8 @@ function uploadFiles (files) {
 function uploaderHook (uploader) {
   return uploadFiles(uploader.files);
 }
+
+window.uploaderHook = uploaderHook;
 
 // Dragging and dropping files into the window
 
