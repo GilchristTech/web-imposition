@@ -1,26 +1,31 @@
 import * as JSZip from 'jszip';
 
-function setMargin (margin) {
+function setMargin (margin: string) {
   document.documentElement.style.setProperty('--crease-margin-quantity', margin);
 }
 
 class ImpositionImage {
+  /*
+    Contains an image and image elements for an imposed page. If the page is
+    full spread, two elements are created for each page in the spread.
+  */
+
+  src              :           string;  // image URL
+  element          : HTMLImageElement;  // DOM element containing the image
+  elementSecondary : HTMLImageElement;  // If the image is a two-page spread, the
+                                        // second half of the image.
+  is_single_page   :          boolean;
+  hidden           :          boolean;
+
   constructor () {
-    /*
-      Contains an image and image elements for an imposed page. If the page is
-      full spread, two elements are created for each page in the spread.
-    */
-
-    this.src              = null;  // image URL
-    this.element          = null;  // DOM element containing the image
-    this.elementSecondary = null;  // If the image is a two-page spread, the
-                                   // second half of the image.
-
-    this.is_single_page   = null;
-    this.hidden;
+    this.src              =  null;
+    this.element          =  null;
+    this.elementSecondary =  null;
+    this.is_single_page   = false;
+    this.hidden           = false;
   }
 
-  onload (e) {
+  onload (e: Event) {
     if (this.element.width > this.element.height) {
       this.element.className = "double";
       this.is_single_page = false;
@@ -38,6 +43,15 @@ class ImpositionImage {
 
 
 class ImpositionBook {
+  images         : Array<ImpositionImage>;
+  spreads        : Array<HTMLElement>;
+  pages          : Array<HTMLElement>;
+  real_pages     : HTMLElement;
+  imposed_pages  : HTMLElement;
+  right_to_left  : boolean;
+  has_back_cover : boolean;
+
+
   constructor () {
     this.images        =    [];
     this.spreads       =  null;
@@ -48,8 +62,8 @@ class ImpositionBook {
     this.imposed_pages =  null;
     
     // Manga-order imposition flag
-    this.right_to_left = false;
-    this.has_back_cover    = true;
+    this.right_to_left  = false;
+    this.has_back_cover = true;
   }
 
   refresh () {
@@ -75,7 +89,7 @@ class ImpositionBook {
       creating page spread elements
     */
 
-    const spreads = this.spreads = [];
+    const spreads: Array<HTMLElement> = this.spreads = [];
     this.pages = [];
 
     // Keep track of which side of the spread the current page will be imposed
@@ -85,9 +99,10 @@ class ImpositionBook {
     // determination can be turned into a string of "left" or "right" by
     // this.pageSideName(page_side)
 
-    let page_side = 1;
+    let page_side : boolean = true;
 
-    for (let [images_i, image] of Object.entries(this.images)) {
+    for (let [images_key, image] of Object.entries(this.images)) {
+      const images_i = parseInt(images_key);
 
       // If this is the back cover and we have the back cover enabled, break,
       // and don't generate it in this loop.
@@ -102,7 +117,7 @@ class ImpositionBook {
 	// Either create a new page spread, or use the previous one, depending
 	// on which page_side of the spread we're on.
 
-	if(spreads.length > 1 && page_side == 1) {
+	if(spreads.length > 1 && page_side == true) {
 	  spread = spreads[spreads.length-1];
 	}
 	else {
@@ -151,7 +166,7 @@ class ImpositionBook {
 
 	// Because this image takes up a full page spread, start the next page
 	// spread at the first page_side in the reading order.
-	page_side = 0;
+	page_side = false;
       }
     }
 
@@ -195,7 +210,7 @@ class ImpositionBook {
       const spread           = this.spreads[this.spreads.length - 1];
 
       const blank_page = this.createPageElement(
-	this.pages.length % 2,
+	<any> (this.pages.length % 2),
 	`page${this.pages.length}`
       );
 
@@ -227,12 +242,12 @@ class ImpositionBook {
   refreshImposedPageOrder () {
     this.imposed_pages.innerHTML = "";
 
-    let last_sheet = null;
+    let last_sheet : HTMLElement = null;
     
     // Group groups of two spreads each into sheets, by mapping a function over
     // each spread.
 
-    this.mapImposedSpreads( (spread) => {
+    this.mapImposedSpreads( (spread : HTMLElement) => {
       let sheet = last_sheet;
 
       if (last_sheet === null) {
@@ -247,13 +262,13 @@ class ImpositionBook {
     });
   }
   
-  imposedSliceSpreads (start, end) {
+  imposedSliceSpreads (start : number, end : number) : Array<HTMLElement> {
     /*
       Return an array of page spreads, those from start to end, but reorded into
       an imposed section.
     */
 
-    const imposed_spreads = Array(this.pages.length >> 1);
+    const imposed_spreads : Array<HTMLElement> = Array(this.pages.length >> 1);
 
     // This imposition algorithm iterates through the real order (that seen by
     // the reader) of page spreads, and uses that spread's index for
@@ -303,7 +318,7 @@ class ImpositionBook {
     return imposed_spreads;
   }
 
-  mapImposedSpreads (start, end, func) {
+  mapImposedSpreads (start : (number|Function), end? : (number|Function), func? : Function) {
     /*
       Map a function over a slice in the real_pages array, but in imposed order
       instead of real order. The start and end arguments are optional, and
@@ -313,39 +328,39 @@ class ImpositionBook {
     // Process which arguments have been provided
 
     switch (arguments.length) {
-      case 1: [ func, start, end ] = [ start,     0, undefined ]; break;
-      case 2: [ func, start, end ] = [   end, start, undefined ]; break;
-      case 3:           /* works as specified */                  break;
+      case 1: [ func, start, end ] = [ <Function> start ,              0, undefined ]; break;
+      case 2: [ func, start, end ] = [ <Function>   end , <number> start, undefined ]; break;
+      case 3:           /* works as specified */                                       break;
 
       default:
-	throw TypeError("ImpositionBooklet.mapImposed() expects 1 to 3 arguments, got " + aguments.length);
+	throw TypeError("ImpositionBooklet.mapImposed() expects 1 to 3 arguments, got " + arguments.length);
     }
 
-    return this.imposedSliceSpreads(start, end).map(func);
+    return this.imposedSliceSpreads(<number> start, <number> end).map(<any> func);
   }
 
-  createElement (tag, classes="", id="") {
+  createElement (tag : string, classes="", id="") : HTMLElement {
     const element     = document.createElement(tag);
     element.className = classes;
     element.id        = id;
     return element;
   }
 
-  createSheetElement (id="") {
+  createSheetElement (id="") : HTMLElement {
     return this.createElement("div", "sheet", id);
   }
 
-  createSpreadElement (id="") {
+  createSpreadElement (id="") : HTMLElement {
     return this.createElement("div", "spread", id);
   }
 
-  createPageElement (side, id="") {
+  createPageElement (side : boolean, id="") : HTMLElement {
     const classes = `spread-page spread-${this.pageSideName(side)}`;
     return this.createElement("div", classes, id);
   }
 
-  pageSideName (side_number) {
-    return (side_number ^ this.right_to_left) ? "right" : "left";
+  pageSideName (side: boolean) : string {
+    return (<any>side ^ <any>this.right_to_left) ? "right" : "left";
   }
 }
 
@@ -353,7 +368,7 @@ class ImpositionBook {
 const book = new ImpositionBook();
 
 
-function processZip (zipfile) {
+function processZip (zipfile : File) {
   /*
     Read a zip file's contents, converting the files into image data URLS, and
     putting them into ImpositionImage objects. Return a promise that runs once
@@ -362,8 +377,8 @@ function processZip (zipfile) {
 
   return JSZip.loadAsync(zipfile).then( (zip) => {
 
-    const images = book.images = [];
-    const promises = [];
+    const images   : Array<ImpositionImage> = book.images = [];
+    const promises : Array<Promise<void>>   = [];
 
     // Go through each file in the zip archive. For each, create a promise, and
     // return a promise which finishes once each file-read-promise is finished
@@ -372,21 +387,21 @@ function processZip (zipfile) {
       const img = new ImpositionImage();
       images.push(img);
       
-      const promise = file.async("blob").then( (blob) => {
+      const promise : Promise<void> = file.async("blob").then( (blob) => {
 
 	// Create a base64 image URI from the file contents, then use that to
 	// create an image element.
 
 	const content = URL.createObjectURL(blob);
 
-	return new Promise( (resolve, reject) => {
+	return new Promise( (resolve: Function, reject: Function) => {
 	  img.element = document.createElement("img");
 
 	  // Once the image is loaded, fire the ImpositionImage class' onload
 	  // event
 
-	  img.element.addEventListener('load', () => {
-	    img.onload();
+	  img.element.addEventListener('load', (e:Event) => {
+	    img.onload(e);
 	    return resolve()
 	  });
 
@@ -406,8 +421,8 @@ function processZip (zipfile) {
   
 }
 
-function processImage (file, refresh=true) {
-  return new Promise( (resolve, reject) => {
+function processImage (file : File, refresh=true) : Promise<void> {
+  return new Promise<void>( (resolve, reject) => {
     const img     = new ImpositionImage();
     const content = URL.createObjectURL(file);
     img.src = content;
@@ -416,8 +431,8 @@ function processImage (file, refresh=true) {
 
     book.images.push(img);
 
-    img.element.addEventListener('load', () => {
-      img.onload();
+    img.element.addEventListener('load', (e) => {
+      img.onload(e);
       return resolve();
     });
 
@@ -426,7 +441,7 @@ function processImage (file, refresh=true) {
 }
 
 
-function processUpload (file) {
+function processUpload (file: File) {
   if (file.type == "application/zip") {
     return processZip(file);
   }
@@ -439,7 +454,8 @@ function processUpload (file) {
   });
 }
 
-function uploadFiles (files) {
+
+function uploadFiles (files: any) : Promise<void> {
   return Promise.all(
     Array.from(files).map(processUpload)
   ).then( ()=> {
@@ -456,43 +472,55 @@ function uploadFiles (files) {
   });
 }
 
-function uploaderHook (uploader) {
+
+declare global {
+  interface Window {
+    uploaderHook: Function,
+  }
+};
+
+
+function uploaderHook (uploader: HTMLInputElement) : Promise<void> {
   return uploadFiles(uploader.files);
 }
+
 
 window.uploaderHook = uploaderHook;
 
 // Dragging and dropping files into the window
 
+
 window.ondragover = function (event) {
   event.preventDefault();
 }
+
 
 window.ondrop = function (event) {
   event.preventDefault();
   uploadFiles(event.dataTransfer.files);
 }
 
+
 window.addEventListener("load", () => {
   book.real_pages = document.getElementById("real-pages");
   book.imposed_pages = document.getElementById("imposed-pages");
 
   document.getElementById("right-to-left").onchange = function(e) {
-    book.right_to_left = e.target.checked;
+    book.right_to_left = (<HTMLInputElement> e.target).checked;
     book.refresh();
   };
 
   document.getElementById("back-cover-toggle").onchange = function(e) {
-    book.has_back_cover = e.target.checked;
+    book.has_back_cover = (<HTMLInputElement> e.target).checked;
     book.refresh();
   };
 
-  document.getElementById("crease-margin").onchange = function(e) {
-    this.value = parseFloat(this.value).toFixed(1);
-    setMargin(e.target.value);
+  document.getElementById("crease-margin").onchange = function(e: Event) {
+    (<HTMLInputElement> this).value = parseFloat((<HTMLInputElement> this).value).toFixed(1);
+    setMargin((<HTMLInputElement> e.target).value);
   };
 
-  function handleViewChange (e) {
+  function handleViewChange (e: any) {
     document.getElementById("pages-welcome").classList.add("hidden");
 
     if (e.target.id == "select-real-view") {
