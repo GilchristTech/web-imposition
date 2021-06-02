@@ -1,84 +1,79 @@
 import * as      JSZip from        'jszip';
 import * as Imposition from './imposition';
 
+import { ImpositionImage } from './imposition';
 
-const book = new Imposition.ImpositionBook();
 
-
-function processZip (zipfile : File) {
+function processZip (zip : (File|JSZip)) : Promise<ImpositionImage[]> {
   /*
     Read a zip file's contents, converting the files into image data URLS, and
-    putting them into Imposition.ImpositionImage objects. Return a promise that runs once
+    putting them into ImpositionImage objects. Return a promise that runs once
     all images are loaded.
   */
 
-  return JSZip.loadAsync(zipfile).then( (zip) => {
+  if (zip instanceof JSZip) {
+    return processZipContents(<JSZip> zip);
+  }
 
-    const images   : Array<Imposition.ImpositionImage> = book.images = [];
-    const promises : Array<Promise<void>>   = [];
+  // zip is File
+  return processZipFile(<File> zip);
+}
 
-    // Go through each file in the zip archive. For each, create a promise, and
-    // return a promise which finishes once each file-read-promise is finished
 
-    zip.forEach( (path, file) => {
-      const img = new Imposition.ImpositionImage();
-      images.push(img);
-      
-      const promise : Promise<void> = file.async("blob").then( (blob) => {
+function processZipFile (zipfile: File) : Promise<ImpositionImage[]> {
+  /*
+    Given a file object, open it as a JSZip and read its contents, converting
+    the files into image data URLS, and putting them into
+    ImpositionImage objects. Return a promise that runs once all
+    images are loaded.
+  */
 
-	// Create a base64 image URI from the file contents, then use that to
-	// create an image element.
+  return JSZip.loadAsync( zipfile ).then(
+    processZipContents,
+  );
+}
 
-	const content = URL.createObjectURL(blob);
 
-	return new Promise( (resolve: Function, reject: Function) => {
-	  img.element = document.createElement("img");
+function processZipContents (zip: JSZip) : Promise<ImpositionImage[]> {
+  /*
+    Given a JSZip, read each of its files.
+  */
 
-	  // Once the image is loaded, fire the Imposition.ImpositionImage class' onload
-	  // event
+  const promises : Promise<ImpositionImage>[] = [];
 
-	  img.element.addEventListener('load', (e:Event) => {
-	    img.onload(e);
-	    return resolve()
-	  });
+  // Go through each file in the zip archive. For each, create a promise, and
+  // return a promise which finishes once each file-read-promise is finished
 
-	  img.element.addEventListener('error', (error) => reject(error));
-	  img.src = img.element.src = content;
-	});
-      });
-
-      promises.push(promise);
-    });
-    
-    return Promise.all(promises);
-
-  }, function zipReadError(err) {
-      // TODO
+  zip.forEach( (path, file) => {
+    promises.push( file.async("blob").then(
+	(blob) => ImpositionImage.fromBlob(blob)
+    ));
   });
   
-}
-
-function processImage (file : File, refresh=true) : Promise<void> {
-  return new Promise<void> ( (resolve, reject) => {
-    const img     = new Imposition.ImpositionImage();
-    const content = URL.createObjectURL(file);
-    img.src = content;
-    img.element   = document.createElement("img");
-    img.element.src = content;
-
-    book.images.push(img);
-
-    img.element.addEventListener('load', (e) => {
-      img.onload(e);
-      return resolve();
-    });
-
-    img.element.addEventListener('error', (error) => reject(error));
+  return Promise.all( promises ).then( (images: any) => {
+      book.images = <ImpositionImage[]> images;
+      return images;
   });
 }
 
 
-function processUpload (file: File) {
+function processImage (file : File, refresh=true) : Promise<ImpositionImage> {
+  const book_image_index = book.images.length;
+
+  return ImpositionImage.fromURL(
+    URL.createObjectURL(file)
+  ).then( (image: ImpositionImage) => {
+    book.images[book_image_index] = image;
+    return image;
+  });
+}
+
+
+function processFile (file: File) : Promise<ImpositionImage|ImpositionImage[]> {
+  /*
+     Given a file, read it's MIME type, and process it as either a zip or image.
+  */
+
   if (file.type == "application/zip") {
     return processZip(file);
   }
@@ -86,16 +81,16 @@ function processUpload (file: File) {
     return processImage(file);
   }
 
-  const wrong_MIME_promise = new Promise( (resolve, reject) => {
-    return reject(`Expected MIME type of application/zip or image/*, got ${file.type}`);
+  return new Promise<ImpositionImage>( (resolve, reject) => {
+    reject(`Expected MIME type of application/zip or image/*, got ${file.type}`);
   });
 }
 
 
 function uploadFiles (files: any) : Promise<void> {
   return Promise.all(
-    Array.from(files).map(processUpload)
-  ).then( ()=> {
+    Array.from(files).map(processFile)
+  ).then( (result_sets: Array<ImpositionImage[]>)=> {
     book.refresh();
     
     // Enable page view buttons and select one
@@ -113,8 +108,12 @@ function uploadFiles (files: any) : Promise<void> {
 declare global {
   interface Window {
     uploaderHook: Function,
+    book: Imposition.ImpositionBook
   }
 };
+
+
+const book = window.book = new Imposition.ImpositionBook();
 
 
 type EventHandler = (event: Event) => void;

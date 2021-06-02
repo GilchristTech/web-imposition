@@ -23,7 +23,36 @@ export class ImpositionImage {
     this.hidden           = false;
   }
 
-  onload (e: Event) {
+  static fromURL (src: string) : Promise<ImpositionImage> {
+    return new ImpositionImage().loadURL(src);
+  }
+
+  static fromBlob (blob: Blob) : Promise<ImpositionImage> {
+    return ImpositionImage.fromURL(URL.createObjectURL(blob));
+  }
+
+  loadURL (src: string) : Promise<ImpositionImage> {
+    /*
+      Creates an image element, sets it's source, and return a Promise which
+      returns this ImpositionImage object, once the source has been loaded and
+      processeded
+    */
+
+    return new Promise<ImpositionImage>( (resolve: Function, reject: Function) => {
+      this.element     = document.createElement("img");
+      this.src         = src;
+      this.element.src = src;
+
+      this.element.addEventListener('load', (e) => {
+	this.onload(e);
+	resolve(this);
+      });
+
+      this.element.addEventListener('error', (error) => reject(error));
+    });
+  }
+
+  onload (e: Event) : void {
     if (this.element.width > this.element.height) {
       this.element.className = "double";
       this.is_single_page = false;
@@ -62,6 +91,10 @@ export class ImpositionBook {
     // Manga-order imposition flag
     this.right_to_left  = false;
     this.has_back_cover = true;
+  }
+
+  addImages (images: ImpositionImage[]) {
+    this.images.concat(images);
   }
 
   refresh () {
@@ -260,57 +293,64 @@ export class ImpositionBook {
     });
   }
   
-  imposedSliceSpreads (start : number, end : number) : Array<HTMLElement> {
+  imposedSliceSpreads (start? : number, end? : number) : Array<HTMLElement> {
     /*
       Return an array of page spreads, those from start to end, but reorded into
       an imposed section.
     */
 
-    const imposed_spreads : Array<HTMLElement> = Array(this.pages.length >> 1);
+   // The end argument defaults to the length of pages
+   if (end === undefined)
+     end = this.pages.length;
 
-    // This imposition algorithm iterates through the real order (that seen by
-    // the reader) of page spreads, and uses that spread's index for
-    // calculation.
+   const imposed_spreads : Array<HTMLElement> = Array(this.pages.length >> 1);
 
-    for (
-	let imposed_spread_i = 0 ;
-	imposed_spread_i < (end - start + 1) / 2 ;
-	imposed_spread_i++
-    ) {
-      // Take one page index from both the front and back of the range of pages
-      // we're imposing. Depending on whether we're on the front or back of this
-      // sheet, these indices should be swapped.
+   // This imposition algorithm iterates through the real order (that seen by
+   // the reader) of page spreads, and uses that spread's index for
+   // calculation.
 
-      let  left_src_i  = end - start - 1 - imposed_spread_i;
-      let right_src_i  = imposed_spread_i;
+   for (
+     let imposed_spread_i = 0 ;
+     imposed_spread_i < (end - start) / 2 ;
+     imposed_spread_i++
+   ) {
+     // Take one page index from both the front and back of the range of pages
+     // we're imposing. Depending on whether we're on the front or back of this
+     // sheet, these indices should be swapped.
 
-      if (imposed_spread_i % 2) {
-	[left_src_i, right_src_i] = [right_src_i, left_src_i];
-      }
+     let  left_src_i  = end - 1 - imposed_spread_i;
+     let right_src_i  = start + imposed_spread_i;
+
+     // An even spread index is the back of the sheet, and an odd index is the
+     // front. On front indices, swap the left and right pages
+
+     if (imposed_spread_i % 2) {
+       [left_src_i, right_src_i] = [right_src_i, left_src_i];
+     }
   
-      const  left_source_element  = this.pages[left_src_i];
-      const right_source_element  = this.pages[right_src_i];
+     const  left_source_element  = this.pages[left_src_i];
+     const right_source_element  = this.pages[right_src_i];
  
-      // Create an element for the imposed page spread, to be added to the
-      // return element.
+     // Create an element for the imposed page spread, to be added to the
+     // return element.
 
-      const imposed_spread_element = this.createSpreadElement();
+     const imposed_spread_element = this.createSpreadElement();
 
-      // Deep copy page sources
+     // Deep copy page sources
 
-      if (left_source_element) {
-	imposed_spread_element.appendChild(
-	  left_source_element.cloneNode(true)
-	);
-      }
+     if (left_source_element) {
+       imposed_spread_element.appendChild(
+         left_source_element.cloneNode(true)
+       );
+     }
 
-      if (right_source_element) {
-	imposed_spread_element.appendChild(
-	  right_source_element.cloneNode(true)
-	);
-      }
+     if (right_source_element) {
+       imposed_spread_element.appendChild(
+         right_source_element.cloneNode(true)
+       );
+     }
 
-      imposed_spreads[imposed_spread_i] = imposed_spread_element;
+     imposed_spreads[imposed_spread_i] = imposed_spread_element;
     }
 
     return imposed_spreads;
