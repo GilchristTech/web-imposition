@@ -93,15 +93,27 @@ function uploadFiles (files: any) : Promise<void> {
   ).then( (result_sets: Array<ImpositionImage[]>)=> {
     book.refresh();
     
-    // Enable page view buttons and select one
-
-    const select_real_view    = document.getElementById("select-real-view");
-    const select_imposed_view = document.getElementById("select-imposed-view");
-
-    select_real_view.removeAttribute("disabled");
-    select_imposed_view.removeAttribute("disabled");
-    select_real_view.click();
+    // Enter real view
+    document.getElementById("select-real-view").click();
   });
+}
+
+
+function enableViews () : void {
+  const select_real_view    = document.getElementById("select-real-view");
+  const select_imposed_view = document.getElementById("select-imposed-view");
+
+  select_real_view.removeAttribute("disabled");
+  select_imposed_view.removeAttribute("disabled");
+}
+
+
+function disableViews () : void {
+  const select_real_view    = document.getElementById("select-real-view");
+  const select_imposed_view = document.getElementById("select-imposed-view");
+
+  select_real_view.setAttribute("disabled", null);
+  select_imposed_view.setAttribute("disabled", null);
 }
 
 
@@ -182,6 +194,7 @@ window.addEventListener("load", () => {
   };
 
   function handleViewChange (e: any) {
+    enableViews();
     document.getElementById("pages-welcome").classList.add("hidden");
 
     if (e.target.id == "select-real-view") {
@@ -196,5 +209,37 @@ window.addEventListener("load", () => {
 
   document.getElementById("select-real-view").onchange    = handleViewChange;
   document.getElementById("select-imposed-view").onchange = handleViewChange;
+
+  document.getElementById("load-sample-doc").onclick = function () {
+    /*
+       Download a sample file, a zip of images, load it, and display the
+       contents.
+    */
+
+    fetch("static/sample.zip")
+      .then( response => {
+	switch (response.status) {
+	  case 200:
+	  case   0:
+	    return Promise.resolve(response.blob());
+
+	  default:
+	    return Promise.reject(`Could not fetch sample document, HTTP status code: ${response.status}`);
+	}
+      })
+      .then( JSZip.loadAsync    )
+      .then( processZipContents )
+      .then(
+	(pages) => {
+	  book.refresh();
+	  enableViews();
+	  document.getElementById("select-real-view").click();
+	},
+
+	function handleError (err) {
+	  alert(`An error occured in loading the sample document: ${err}`);
+	}
+      );
+  };
 
 });

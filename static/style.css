@@ -90,12 +90,17 @@ body > .scroll {
 }
 
 #pages-welcome {
-  text-align: center;
   height: 100%;
   display: flex;
+  align-items: center;
   flex-direction: column;
-  justify-content: space-around;
+  justify-content: center;
   color: #666;
+}
+
+#pages-welcome > h2 {
+  padding: 2em;
+  border: 3px #888 dashed;
 }
 
 .spread {
