@@ -1,7 +1,18 @@
-import * as      JSZip from        'jszip';
-import * as Imposition from './imposition';
+import * as Imposition from       './imposition';
+import * as      JSZip from              'jszip';
+import * as      PDFJS from 'pdfjs-dist/webpack';
 
 import { ImpositionImage } from './imposition';
+
+import {
+  PDFPageProxy, PDFDocumentProxy
+} from 'pdfjs-dist/webpack';
+
+// Shorten the names of PDF proxy objects for the sake of brevity in other
+// declarations.
+
+type PDFPage     = PDFPageProxy;
+type PDFDocument = PDFDocumentProxy;
 
 
 function processZip (zip : (File|JSZip)) : Promise<ImpositionImage[]> {
@@ -57,6 +68,23 @@ function processZipContents (zip: JSZip) : Promise<ImpositionImage[]> {
 }
 
 
+function processPDFContents (pdf: PDFDocument) : Promise<ImpositionImage[]> {
+  /*
+    Given a PDF document, promise to convert each page into an ImpositionImage
+  */
+  
+  const promises : Promise<ImpositionImage>[]  = [];
+
+  for (let page_num = 0; page_num < pdf.numPages; page_num++) {
+    promises[page_num] = pdf.getPage( page_num ).then( ImpositionImage.fromPDFPage );
+  }
+
+  return Promise.all( promises ).then( (pages: any) => {
+    return <ImpositionImage[]> pages;
+  });
+}
+
+
 function processImage (file : File, refresh=true) : Promise<ImpositionImage> {
   const book_image_index = book.images.length;
 
@@ -73,16 +101,23 @@ function processFile (file: File) : Promise<ImpositionImage|ImpositionImage[]> {
   /*
      Given a file, read it's MIME type, and process it as either a zip or image.
   */
+  
+  switch(file.type) {
+    case "application/zip":
+      return processZip(file);
 
-  if (file.type == "application/zip") {
-    return processZip(file);
-  }
-  else if (file.type.startsWith("image/")) {
-    return processImage(file);
-  }
+    case "application/pdf":
+      break; // TODO return processPDF(file);
+
+    default:
+      if (file.type.startsWith("image/")) {
+	return processImage(file);
+      }
+      break;
+  };
 
   return new Promise<ImpositionImage>( (resolve, reject) => {
-    reject(`Expected MIME type of application/zip or image/*, got ${file.type}`);
+    reject(`Expected MIME type for a PDF, ZIP, or image, got ${file.type}`);
   });
 }
 
@@ -242,4 +277,26 @@ window.addEventListener("load", () => {
       );
   };
 
+
+  document.getElementById("load-sample-pdf").onclick = function () {
+    /*
+       Download a sample file, a PDF, and impose its contents
+    */
+   
+    PDFJS.getDocument(
+      "static/sample.pdf"
+    ).promise
+      .then( processPDFContents )
+      .then (
+	(pages) => {
+	  // book.refresh();
+	  // enableViews();
+	},
+
+	function handleError (err) {
+	  alert(`An error occured in loading the sample document: ${err}`);
+	}
+      );
+
+  };
 });

@@ -1,3 +1,15 @@
+import  * as PDFJS      from 'pdfjs-dist/webpack';
+
+import {
+  PDFPageProxy, PDFDocumentProxy
+} from 'pdfjs-dist/webpack';
+
+// Shorten the names of PDF proxy objects for the sake of brevity in other
+// declarations.
+
+type PDFPage     = PDFPageProxy;
+type PDFDocument = PDFDocumentProxy;
+
 export function setMargin (margin: string) {
   document.documentElement.style.setProperty('--crease-margin-quantity', margin);
 }
@@ -29,6 +41,20 @@ export class ImpositionImage {
 
   static fromBlob (blob: Blob) : Promise<ImpositionImage> {
     return ImpositionImage.fromURL(URL.createObjectURL(blob));
+  }
+
+  static fromPDFPage (page: PDFPage) : Promise<ImpositionImage> {
+    // TODO: WIP
+
+    const viewport = page.getViewport({scale: 1});
+
+    const canvas   = document.createElement("canvas");
+    const context  = canvas.getContext("2d");
+
+    canvas.width;
+    canvas.height;
+    
+    return null;
   }
 
   loadURL (src: string) : Promise<ImpositionImage> {
