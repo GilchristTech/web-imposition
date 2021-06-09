@@ -76,12 +76,10 @@ function processPDFContents (pdf: PDFDocument) : Promise<ImpositionImage[]> {
   const promises : Promise<ImpositionImage>[]  = [];
 
   for (let page_num = 0; page_num < pdf.numPages; page_num++) {
-    promises[page_num] = pdf.getPage( page_num ).then( ImpositionImage.fromPDFPage );
+    promises[page_num] = pdf.getPage( page_num + 1 ).then( ImpositionImage.fromPDFPage );
   }
 
-  return Promise.all( promises ).then( (pages: any) => {
-    return <ImpositionImage[]> pages;
-  });
+  return <Promise<ImpositionImage[]>> Promise.all(promises);
 }
 
 
@@ -289,8 +287,10 @@ window.addEventListener("load", () => {
       .then( processPDFContents )
       .then (
 	(pages) => {
-	  // book.refresh();
-	  // enableViews();
+	  book.images = pages;
+	  book.refresh();
+	  enableViews();
+	  document.getElementById("select-real-view").click();
 	},
 
 	function handleError (err) {

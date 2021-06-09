@@ -1,10 +1,10 @@
-import  * as PDFJS      from 'pdfjs-dist/webpack';
+import  * as PDFJS from 'pdfjs-dist/webpack';
 
 import {
   PDFPageProxy, PDFDocumentProxy
 } from 'pdfjs-dist/webpack';
 
-// Shorten the names of PDF proxy objects for the sake of brevity in other
+// Shorten the names of PDF proxy objects for the sake of brevity in
 // declarations.
 
 type PDFPage     = PDFPageProxy;
@@ -20,12 +20,16 @@ export class ImpositionImage {
     full spread, two elements are created for each page in the spread.
   */
 
-  src              :           string;  // image URL
-  element          : HTMLImageElement;  // DOM element containing the image
-  elementSecondary : HTMLImageElement;  // If the image is a two-page spread, the
-                                        // second half of the image.
-  is_single_page   :          boolean;
-  hidden           :          boolean;
+  src              :            string;  // image URL
+  element          :  HTMLImageElement;  // DOM element containing the image
+  elementSecondary :  HTMLImageElement;  // If the image is a two-page spread, the
+                                         // second half of the image.
+  
+  canvas_element   : HTMLCanvasElement;
+
+  is_single_page   :           boolean;
+  hidden           :           boolean;
+  loaded           :           boolean;
 
   constructor () {
     this.src              =  null;
@@ -33,6 +37,7 @@ export class ImpositionImage {
     this.elementSecondary =  null;
     this.is_single_page   = false;
     this.hidden           = false;
+    this.loaded           = false;
   }
 
   static fromURL (src: string) : Promise<ImpositionImage> {
@@ -43,18 +48,32 @@ export class ImpositionImage {
     return ImpositionImage.fromURL(URL.createObjectURL(blob));
   }
 
+  static fromCanvas (canvas: HTMLCanvasElement) : Promise<ImpositionImage> {
+    return ImpositionImage
+      .fromURL(canvas.toDataURL("image/png"))
+      .then( (img) => {
+	img.canvas_element = canvas;
+	return img;
+      });
+  }
+
   static fromPDFPage (page: PDFPage) : Promise<ImpositionImage> {
-    // TODO: WIP
+    const viewport = page.getViewport({scale: 1.5});
 
-    const viewport = page.getViewport({scale: 1});
+    const canvas  = document.createElement("canvas");
+    const context = canvas.getContext("2d");
 
-    const canvas   = document.createElement("canvas");
-    const context  = canvas.getContext("2d");
+    canvas.width  = viewport.width;
+    canvas.height = viewport.height;
 
-    canvas.width;
-    canvas.height;
-    
-    return null;
+    return page.render({
+      canvasContext: context,
+      viewport
+    }).promise.then(
+      () => {
+	return ImpositionImage.fromCanvas(canvas);
+      }
+    );
   }
 
   loadURL (src: string) : Promise<ImpositionImage> {
@@ -79,6 +98,8 @@ export class ImpositionImage {
   }
 
   onload (e: Event) : void {
+    this.loaded = true;
+
     if (this.element.width > this.element.height) {
       this.element.className = "double";
       this.is_single_page = false;

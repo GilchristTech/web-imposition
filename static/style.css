@@ -98,7 +98,13 @@ body > .scroll {
   color: #666;
 }
 
+#pages-welcome > * {
+  max-width: 45rem;
+}
+
 #pages-welcome > h2 {
+  display: block;
+  text-align: center;
   padding: 2em;
   border: 3px #888 dashed;
 }
