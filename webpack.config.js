@@ -1,7 +1,8 @@
-const path              = require('path');
-const webpack           = require('webpack');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const CopyWebpackPlugin = require('copy-webpack-plugin');
+const path                 = require('path');
+const webpack              = require('webpack');
+const HtmlWebpackPlugin    = require('html-webpack-plugin');
+const CopyWebpackPlugin    = require('copy-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 module.exports = {
 	entry: path.join(__dirname, 'src', 'index.ts'),
@@ -15,7 +16,7 @@ module.exports = {
 
 	module: {
 		rules: [
-			{ test: /\.css$/, use: [ 'style-loader', 'css-loader' ] },
+			{ test: /\.css$/, use: [ MiniCssExtractPlugin.loader, 'css-loader' ] },
 			{ test: /\.ts$/,  use: 'ts-loader', exclude: /node_modules/ }
 		]
 	},
@@ -33,6 +34,8 @@ module.exports = {
 			patterns: [{
 				from: 'static'
 			}]
-		})
+		}),
+
+		new MiniCssExtractPlugin()
 	]
 };
