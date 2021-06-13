@@ -2,7 +2,7 @@ import * as Imposition from       './imposition';
 import * as      JSZip from              'jszip';
 import * as      PDFJS from 'pdfjs-dist/webpack';
 
-import './style.css';
+import './interface.css';
 
 import { ImpositionImage } from './imposition';
 

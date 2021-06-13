@@ -4,6 +4,8 @@ import {
   PDFPageProxy, PDFDocumentProxy
 } from 'pdfjs-dist/webpack';
 
+import './pages.css';
+
 // Shorten the names of PDF proxy objects for the sake of brevity in
 // declarations.
 
