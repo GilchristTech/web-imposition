@@ -58,9 +58,15 @@ function processZipContents (zip: JSZip) : Promise<ImpositionImage[]> {
   // return a promise which finishes once each file-read-promise is finished
 
   zip.forEach( (path, file) => {
-    promises.push( file.async("blob").then(
+    promises.push(
+      file.async("blob").then(
 	(blob) => ImpositionImage.fromBlob(blob)
-    ));
+      ).then(
+	img => {
+	  img.name = file.name; return img
+	}
+      )
+    )
   });
   
   return Promise.all( promises ).then( (images: any) => {
@@ -126,7 +132,7 @@ function uploadFiles (files: any) : Promise<void> {
   return Promise.all(
     Array.from(files).map(processFile)
   ).then( (result_sets: Array<ImpositionImage[]>)=> {
-    book.refresh();
+    refresh();
     
     // Enter real view
     document.getElementById("select-real-view").click();
@@ -205,6 +211,31 @@ window.ondrop = function (event) {
 }
 
 
+function refresh() : void {
+  book.refresh();
+
+  const pages_list = document.getElementById("pages-list");
+  const list_item_template = (<any> document.getElementById("page-list-item-template")).content;
+
+  pages_list.innerHTML = "";
+
+  /*
+    For each source image, add a page to the pages list.
+  */
+
+  for (let i in book.images) {
+    const page = book.images[i];
+    const list_item : HTMLElement = list_item_template.cloneNode(true).childNodes[1];
+
+    list_item.setAttribute("data-key", i);
+    list_item.setAttribute("data-name", page.name ?? "");
+    list_item.querySelector(".page-name").textContent = `${parseInt(i)+1}. ${page.name ?? "(untitled page)"}`;
+
+    pages_list.appendChild(list_item);
+  }
+}
+
+
 /*
   Page load
 */
@@ -215,12 +246,12 @@ window.addEventListener("load", () => {
 
   document.getElementById("right-to-left").onchange = function(e) {
     book.right_to_left = (<HTMLInputElement> e.target).checked;
-    book.refresh();
+    refresh();
   };
 
   document.getElementById("back-cover-toggle").onchange = function(e) {
     book.has_back_cover = (<HTMLInputElement> e.target).checked;
-    book.refresh();
+    refresh();
   };
 
   document.getElementById("crease-margin").onchange = function(e: Event) {
@@ -266,7 +297,7 @@ window.addEventListener("load", () => {
       .then( processZipContents )
       .then(
 	(pages) => {
-	  book.refresh();
+	  refresh();
 	  enableViews();
 	  document.getElementById("select-real-view").click();
 	},
@@ -289,8 +320,15 @@ window.addEventListener("load", () => {
       .then( processPDFContents )
       .then (
 	(pages) => {
+	  // Assign names to each image
+	  
+	  for (let i = 0; i < pages.length; i++) {
+	    const page = pages[i];
+	    page.name = "Sample PDF pg. " + (i+1);
+	  }
+
 	  book.images = pages;
-	  book.refresh();
+	  refresh();
 	  enableViews();
 	  document.getElementById("select-real-view").click();
 	},

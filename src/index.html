@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <title>Web Imposition</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -34,6 +33,17 @@
     <label for="select-imposed-view">Imposed View</label>
 
     <button onclick="window.print()">Save/Print</button>
+
+    Page List:
+    <template id="page-list-item-template">
+      <li>
+	<span  class="page-name"></span>
+	<input class="page-selected" type="checkbox"/></input>
+	<input class="page-edit"     type="button"/></input>
+      </li>
+    </template>
+    <ol id="pages-list" class="pages-list"></ol>
+
   </div>
   
   <div class="scroll">
@@ -57,6 +67,5 @@
     <div class="pages hidden" id="real-pages"></div>
     <div class="pages hidden" id="imposed-pages"></div>
   </div>
-
 </body>
 </html>

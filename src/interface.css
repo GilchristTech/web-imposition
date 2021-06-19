@@ -63,6 +63,45 @@ input[disabled]+label {
   color: #aaa;
 }
 
+ol.pages-list {
+  border: 1px solid #444;
+  border-radius: 3px;
+  background: white;
+  height: 200px;
+  width: 100%;
+  overflow: scroll;
+  padding: 0;
+  color: #444;
+}
+
+ol.pages-list li:nth-child(even) {
+  background: #f4f4ff;
+}
+
+ol.pages-list li {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: end;
+  margin: none;
+  padding: 0 4px;
+}
+
+ol.pages-list li > span {
+  flex-grow: 1;
+  font-size: 1em;
+}
+
+ol.pages-list li[data-name=""] > span {
+  font-style: italic;
+  color: #888;
+}
+
+ol.pages-list li.selected {
+  background: #44f;
+  color: white;
+}
+
 body > .scroll {
   grid-area: pages;
 }

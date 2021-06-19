@@ -22,6 +22,7 @@ export class ImpositionImage {
     full spread, two elements are created for each page in the spread.
   */
 
+  name             :            string;
   src              :            string;  // image URL
   element          :  HTMLImageElement;  // DOM element containing the image
   elementSecondary :  HTMLImageElement;  // If the image is a two-page spread, the
@@ -34,6 +35,7 @@ export class ImpositionImage {
   loaded           :           boolean;
 
   constructor () {
+    this.name             =  null;
     this.src              =  null;
     this.element          =  null;
     this.elementSecondary =  null;
