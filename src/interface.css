@@ -18,6 +18,7 @@ body {
 
 .hidden {
   display: none !important;
+  opacity: 0 !important;
 }
 
 
@@ -48,7 +49,7 @@ input[type="file"] {
   max-width: 100%;
 }
 
-input#crease-margin {
+input.crease-margin {
   direction: rtl;
   text-align: right;
   padding-right: 40px;
@@ -104,6 +105,96 @@ ol.pages-list li.selected {
 
 body > .scroll {
   grid-area: pages;
+}
+
+.layer {
+  position: absolute;
+  top: 0; right: 0; bottom: 0; left: 0;
+}
+
+.layer#modal-container {
+  background: #0003;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.modal {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  box-shadow: 2px 0 5px 2px #4448;
+}
+
+form.modal .modal-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25em;
+}
+
+form.modal label {
+  display: flex;
+  flex-flow: row wrap;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5em;
+}
+
+form.modal label > input[type="checkbox"] {
+
+}
+
+.modal .modal-header {
+  display: flex;
+  flex-direction: row;
+  justify-items: space-between;
+  align-items: center;
+  border-bottom: 1px solid #ccc;
+  margin-bottom: 1em;
+}
+
+.modal input[type=text],input[type=number] {
+  padding: 6px;
+}
+
+.modal-header h1,h2,h3,h4,h5,h6,p {
+  margin: 0 0 1em 0;
+  font-size: 1em;
+  flex-grow: 1;
+}
+
+.modal-close {
+  justify-self: end;
+}
+
+.modal .modal-main {
+  flex-grow: 1;
+}
+
+.modal .modal-footer {
+  display: flex;
+  flex-direction: row;
+  justify-content: end;
+  align-items: center;
+  gap: 16px;
+}
+
+/*
+  Modal footer items with the class .left are moved to the left side of the
+  footer. Do this by adding a leftward margin to the first non-left element
+  found. If no non-left elements are found, the final left element is given a
+  right margin to shift all children left.
+*/
+
+.modal-footer .left + :not(.left) { margin-left : auto; }
+.modal-footer .left:last-child    { margin-right: auto; }
+
+#image-edit-form {
+  background: white;
+  border-radius: 10px;
+  padding: 1em;
+  max-width: 500px;
 }
 
 #pages-welcome {

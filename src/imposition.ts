@@ -5,6 +5,7 @@ import {
 } from 'pdfjs-dist/webpack';
 
 import './pages.css';
+import './image_edit_modal';
 
 // Shorten the names of PDF proxy objects for the sake of brevity in
 // declarations.
@@ -27,6 +28,7 @@ export class ImpositionImage {
   element          :  HTMLImageElement;  // DOM element containing the image
   elementSecondary :  HTMLImageElement;  // If the image is a two-page spread, the
                                          // second half of the image.
+  crease_margin    :       null|number;
   
   canvas_element   : HTMLCanvasElement;
 
@@ -41,6 +43,7 @@ export class ImpositionImage {
     this.elementSecondary =  null;
     this.is_single_page   = false;
     this.hidden           = false;
+    this.crease_margin    =  null;
     this.loaded           = false;
   }
 
@@ -74,9 +77,7 @@ export class ImpositionImage {
       canvasContext: context,
       viewport
     }).promise.then(
-      () => {
-	return ImpositionImage.fromCanvas(canvas);
-      }
+      () => ImpositionImage.fromCanvas(canvas)
     );
   }
 
