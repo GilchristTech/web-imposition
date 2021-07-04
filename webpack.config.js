@@ -11,6 +11,7 @@ module.exports = {
 
 	output: {
 		path: path.resolve(__dirname, 'dist'),
+		publicPath: process.env.PUBLIC_URL ?? "/",
 		filename: 'bundle.js'
 	},
 
