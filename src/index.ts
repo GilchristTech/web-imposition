@@ -6,6 +6,8 @@ import './interface.css';
 
 import { ImpositionImage } from './imposition';
 
+import { ImagePropertiesContext } from  './image_edit_modal';
+
 import {
   PDFPageProxy, PDFDocumentProxy
 } from 'pdfjs-dist/webpack';
@@ -225,13 +227,43 @@ function refresh() : void {
 
   for (let i in book.images) {
     const page = book.images[i];
-    const list_item : HTMLElement = list_item_template.cloneNode(true).childNodes[1];
+    const page_list_element : HTMLElement = list_item_template.cloneNode(true).childNodes[1];
 
-    list_item.setAttribute("data-key", i);
-    list_item.setAttribute("data-name", page.name ?? "");
-    list_item.querySelector(".page-name").textContent = `${parseInt(i)+1}. ${page.name ?? "(untitled page)"}`;
+    page_list_element.setAttribute("data-key", i);
+    page_list_element.setAttribute("data-name", page.name ?? "");
 
-    pages_list.appendChild(list_item);
+    const page_name_element : HTMLAnchorElement = page_list_element.querySelector(".page-name");
+    page_name_element.textContent = `${page.name ?? "(untitled page)"}`;
+
+    page_name_element.addEventListener("click", async (e) => {
+      let new_image;
+
+      try {
+	new_image = await ImagePropertiesContext.editorForm( page );
+      }
+      catch (err) {
+	// If the form was cancelled, let the error slide, otherwise, re-throw
+	// it
+
+	if (err === "FORM_CANCELLED") {
+	  return;
+	}
+	
+	throw err;
+      }
+
+      // If the editor form promise returned null, delete the image
+      if (new_image === null) {
+	book.images.splice(parseInt(i), 1);
+	refresh();
+	return;
+      }
+
+      // Rename 
+      page_name_element.innerText = new_image.name;
+    });
+
+    pages_list.appendChild(page_list_element);
   }
 }
 

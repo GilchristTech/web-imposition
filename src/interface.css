@@ -71,8 +71,6 @@ ol.pages-list {
   height: 200px;
   width: 100%;
   overflow: scroll;
-  padding: 0;
-  color: #444;
 }
 
 ol.pages-list li:nth-child(even) {
@@ -80,20 +78,27 @@ ol.pages-list li:nth-child(even) {
 }
 
 ol.pages-list li {
+  /*
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: end;
-  margin: none;
   padding: 0 4px;
+  */
+
+  margin: none;
+  color: #888;
 }
 
-ol.pages-list li > span {
+ol.pages-list li > button {
+  background: none;
+  border: none;
+  text-align: left;
   flex-grow: 1;
   font-size: 1em;
 }
 
-ol.pages-list li[data-name=""] > span {
+ol.pages-list li[data-name=""] > button {
   font-style: italic;
   color: #888;
 }
