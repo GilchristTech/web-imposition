@@ -314,7 +314,7 @@ window.addEventListener("load", () => {
        contents.
     */
 
-    fetch("static/sample.zip")
+    fetch("./static/sample.zip")
       .then( response => {
 	switch (response.status) {
 	  case 200:
@@ -347,7 +347,7 @@ window.addEventListener("load", () => {
     */
    
     PDFJS.getDocument(
-      "static/sample.pdf"
+      "./static/sample.pdf"
     ).promise
       .then( processPDFContents )
       .then (
