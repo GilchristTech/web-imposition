@@ -1,6 +1,7 @@
 import * as Imposition from       './imposition';
 import * as      JSZip from              'jszip';
 import * as      PDFJS from 'pdfjs-dist/webpack';
+import  { Spinner }    from  './loading-spinner';
 
 import './interface.css';
 
@@ -154,8 +155,9 @@ function disableViews () : void {
 
 declare global {
   interface Window {
-    uploaderHook: Function,
-    book: Imposition.ImpositionBook
+    uploaderHook    : Function,
+    book            : Imposition.ImpositionBook,
+    loading_spinner : Spinner
   }
 };
 
@@ -212,6 +214,8 @@ window.ondrop = function (event) {
 window.addEventListener("load", () => {
   book.real_pages    = document.getElementById("real-pages");
   book.imposed_pages = document.getElementById("imposed-pages");
+
+  window.loading_spinner = new Spinner(<HTMLElement> document.querySelector("#content-modal .spinner-ring"));
 
   document.getElementById("right-to-left").onchange = function(e) {
     book.right_to_left = (<HTMLInputElement> e.target).checked;
@@ -301,4 +305,5 @@ window.addEventListener("load", () => {
       );
 
   };
+  
 });
