@@ -38,6 +38,10 @@ body {
     line-height: 1.75em;
 }
 
+#main-content {
+  grid-area: pages;
+} 
+
 input[type="checkbox"],
 input[type="checkbox"] + label {
   font-size: 0.8em;
@@ -110,6 +114,35 @@ ol.pages-list li.selected {
 
 body > .scroll {
   grid-area: pages;
+}
+
+.spinner-ring {
+  width: 6em;
+  height: 6em;
+
+  /*
+	Prevent varying border widths don't change the size of this element. If the
+    height and widths are unequal, the spin animation will be lopsided.
+  */
+  box-sizing: border-box;
+  
+  /*
+	Define the visual style of the spinner, a thin, grey, glowing ring where a
+    quarter of it is thicker and blue. The use of vmin units makes the border
+    widths scale in proportion to screen side.
+
+    TODO: calculate these values from custom properties so .loading-spinner instances can be locally themed
+  */
+  border-radius: 50%;
+  border: 0.5vmin #ccc solid;
+  border-top: 1vmin blue solid;
+  box-shadow: 0 0 1vmin 0vmin #fff6, 0 0 1vmin 0vmin #fff6 inset;
+
+  animation: spin 1s infinite ease;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg) }
 }
 
 .layer {
@@ -220,6 +253,17 @@ form.modal label > input[type="checkbox"] {
   text-align: center;
   padding: 2em;
   border: 3px #888 dashed;
+}
+
+#content-modal {
+  position: absolute;
+  background:#0004;
+  top: 0; right: 0; bottom: 0; left: 0;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .pages {

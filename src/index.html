@@ -48,26 +48,33 @@
 
   </div>
   
-  <div class="scroll">
-    <div id="pages-welcome">
-      <h2>Drag image or zip files here to impose pages.</h2>
-	  <div>
-		<h3>Or try these sample documents instead instead!  </h3>
-		<p>
-		  Either load them in-browser, or download the files themselves
-		  to drag-and-drop them into this window from your downloads
-		  folder.
-		</p>
-		<ul>
-		  <li><a id="load-sample-doc" href="javascript:;">Load .zip file (in-browser)</a></li>
-		  <li><a href="./static/sample.zip">Direct .zip file download</a></li>
-		  <li><a id="load-sample-pdf" href="javascript:;">Load PDF (in-browser)</a></li>
-		  <li><a href="./static/sample.pdf">Direct PDF file download</a></li>
-		</ul>
-	  </div>
+  <div id="main-content">
+    <div id="main-content" class="scroll">
+      <div id="pages-welcome">
+	<h2>Drag image or zip files here to impose pages.</h2>
+	<div>
+	  <h3>Or try these sample documents instead instead!  </h3>
+	  <p>
+	  Either load them in-browser, or download the files themselves
+	  to drag-and-drop them into this window from your downloads
+	  folder.
+	  </p>
+	  <ul>
+	    <li><a id="load-sample-doc" href="javascript:;">Load .zip file (in-browser)</a></li>
+	    <li><a href="./static/sample.zip">Direct .zip file download</a></li>
+	    <li><a id="load-sample-pdf" href="javascript:;">Load PDF (in-browser)</a></li>
+	    <li><a href="./static/sample.pdf">Direct PDF file download</a></li>
+	  </ul>
+	</div>
+      </div>
+      <div class="pages hidden" id="real-pages"></div>
+      <div class="pages hidden" id="imposed-pages"></div>
+
+      <div id="content-modal" class="hidden">
+	<div class="spinner-ring hidden"></div>
+      </div>
+
     </div>
-    <div class="pages hidden" id="real-pages"></div>
-    <div class="pages hidden" id="imposed-pages"></div>
   </div>
 
   <div class="layer hidden" id="modal-container">

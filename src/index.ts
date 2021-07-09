@@ -1,6 +1,7 @@
 import * as Imposition from       './imposition';
 import * as      JSZip from              'jszip';
 import * as      PDFJS from 'pdfjs-dist/webpack';
+import  { Spinner }    from  './loading-spinner';
 
 import './interface.css';
 
@@ -162,8 +163,10 @@ function disableViews () : void {
 
 declare global {
   interface Window {
-    uploaderHook: Function,
-    book: Imposition.ImpositionBook
+    uploaderHook    : Function,
+    book            : Imposition.ImpositionBook,
+    content_spinner : Spinner,
+    contentTask     : Function
   }
 };
 
@@ -276,6 +279,13 @@ window.addEventListener("load", () => {
   book.real_pages    = document.getElementById("real-pages");
   book.imposed_pages = document.getElementById("imposed-pages");
 
+  window.content_spinner = new Spinner(<HTMLElement> document.querySelector("#content-modal .spinner-ring"));
+  window.contentTask = function( task : Promise<any> ) : Promise<any> {
+    return window.content_spinner.task(task).then( (value) => {
+      return value;
+    });
+  };
+
   document.getElementById("right-to-left").onchange = function(e) {
     book.right_to_left = (<HTMLInputElement> e.target).checked;
     refresh();
@@ -314,6 +324,8 @@ window.addEventListener("load", () => {
        contents.
     */
 
+    document.querySelector("#content-modal").classList.remove("hidden");
+
     fetch("./static/sample.zip")
       .then( response => {
 	switch (response.status) {
@@ -337,7 +349,10 @@ window.addEventListener("load", () => {
 	function handleError (err) {
 	  alert(`An error occured in loading the sample document: ${err}`);
 	}
-      );
+      )
+      .finally( () => {
+	document.querySelector("#content-modal").classList.add("hidden");
+      });
   };
 
 
@@ -346,12 +361,15 @@ window.addEventListener("load", () => {
        Download a sample file, a PDF, and impose its contents
     */
    
-    PDFJS.getDocument(
-      "./static/sample.pdf"
-    ).promise
+    window.contentTask(
+      PDFJS.getDocument( "./static/sample.pdf" ).promise
+      .then( (v) => {
+	document.querySelector("#content-modal").classList.remove("hidden");
+	return v;
+      })
       .then( processPDFContents )
-      .then (
-	(pages) => {
+      .then(
+	pages => {
 	  // Assign names to each image
 	  
 	  for (let i = 0; i < pages.length; i++) {
@@ -359,16 +377,21 @@ window.addEventListener("load", () => {
 	    page.name = "Sample PDF pg. " + (i+1);
 	  }
 
+	  // Move pages into ImpositionBook and refresh view
+	  
 	  book.images = pages;
 	  refresh();
 	  enableViews();
 	  document.getElementById("select-real-view").click();
 	},
 
-	function handleError (err) {
-	  alert(`An error occured in loading the sample document: ${err}`);
-	}
-      );
+	error => alert(`An error occured in loading the sample document: ${error}`)
+      )
+      .finally( () => {
+	document.querySelector("#content-modal").classList.add("hidden");
+      })
+    );
 
   };
+  
 });
