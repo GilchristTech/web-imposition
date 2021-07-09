@@ -37,13 +37,9 @@ body {
     line-height: 1.75em;
 }
 
-#main-content-wrapper {
+#main-content {
   grid-area: pages;
 } 
-
-#main-content {
-  position: absolute;
-}
 
 input[type="checkbox"],
 input[type="checkbox"] + label {

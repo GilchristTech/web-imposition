@@ -157,7 +157,8 @@ declare global {
   interface Window {
     uploaderHook    : Function,
     book            : Imposition.ImpositionBook,
-    loading_spinner : Spinner
+    content_spinner : Spinner,
+    contentTask     : Function
   }
 };
 
@@ -215,7 +216,12 @@ window.addEventListener("load", () => {
   book.real_pages    = document.getElementById("real-pages");
   book.imposed_pages = document.getElementById("imposed-pages");
 
-  window.loading_spinner = new Spinner(<HTMLElement> document.querySelector("#content-modal .spinner-ring"));
+  window.content_spinner = new Spinner(<HTMLElement> document.querySelector("#content-modal .spinner-ring"));
+  window.contentTask = function( task : Promise<any> ) : Promise<any> {
+    return window.content_spinner.task(task).then( (value) => {
+      return value;
+    });
+  };
 
   document.getElementById("right-to-left").onchange = function(e) {
     book.right_to_left = (<HTMLInputElement> e.target).checked;
@@ -255,6 +261,8 @@ window.addEventListener("load", () => {
        contents.
     */
 
+    document.querySelector("#content-modal").classList.remove("hidden");
+
     fetch("./static/sample.zip")
       .then( response => {
 	switch (response.status) {
@@ -278,7 +286,10 @@ window.addEventListener("load", () => {
 	function handleError (err) {
 	  alert(`An error occured in loading the sample document: ${err}`);
 	}
-      );
+      )
+      .finally( () => {
+	document.querySelector("#content-modal").classList.add("hidden");
+      });
   };
 
 
@@ -287,22 +298,27 @@ window.addEventListener("load", () => {
        Download a sample file, a PDF, and impose its contents
     */
    
-    PDFJS.getDocument(
-      "./static/sample.pdf"
-    ).promise
+    window.contentTask(
+      PDFJS.getDocument( "./static/sample.pdf" ).promise
+      .then( (v) => {
+	document.querySelector("#content-modal").classList.remove("hidden"), v
+	return v;
+      })
       .then( processPDFContents )
-      .then (
-	(pages) => {
+      .then(
+	pages => {
 	  book.images = pages;
 	  book.refresh();
 	  enableViews();
 	  document.getElementById("select-real-view").click();
 	},
 
-	function handleError (err) {
-	  alert(`An error occured in loading the sample document: ${err}`);
-	}
-      );
+	error => alert(`An error occured in loading the sample document: ${error}`)
+      )
+      .finally( () => {
+	document.querySelector("#content-modal").classList.add("hidden");
+      })
+    );
 
   };
   
