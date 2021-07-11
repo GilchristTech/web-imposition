@@ -276,6 +276,7 @@ form.modal label > input[type="checkbox"] {
   text-align: center;
   padding: 2em;
   border: 3px #888 dashed;
+  flex-grow: 0;
 }
 
 #content-modal {
