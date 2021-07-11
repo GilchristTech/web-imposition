@@ -206,23 +206,18 @@ form.modal label > input[type="checkbox"] {
 
 }
 
-.modal .modal-header {
+.modal header {
   display: flex;
   flex-direction: row;
   justify-items: space-between;
   align-items: center;
   border-bottom: 1px solid #ccc;
   margin-bottom: 1em;
+  padding-bottom: 1em;
 }
 
 .modal input[type=text],input[type=number] {
   padding: 6px;
-}
-
-.modal-header h1,h2,h3,h4,h5,h6,p {
-  margin: 0 0 1em 0;
-  font-size: 1em;
-  flex-grow: 1;
 }
 
 .modal-close {
@@ -233,7 +228,7 @@ form.modal label > input[type="checkbox"] {
   flex-grow: 1;
 }
 
-.modal .modal-footer {
+.modal > footer {
   display: flex;
   flex-direction: row;
   justify-content: end;
@@ -248,8 +243,8 @@ form.modal label > input[type="checkbox"] {
   right margin to shift all children left.
 */
 
-.modal-footer .left + :not(.left) { margin-left : auto; }
-.modal-footer .left:last-child    { margin-right: auto; }
+.modal > footer .left + :not(.left) { margin-left : auto; }
+.modal > footer .left:last-child    { margin-right: auto; }
 
 #image-edit-form {
   background: white;

@@ -59,7 +59,7 @@
 	folder.
 	</p>
 	<ul>
-	  <li><a id="load-sample-pdf" href="javascript:;">Load PDF (in-browser)</a></li>
+	  <li><a id="load-sample-pdf" href="javascript:;">Load in-browser</a></li>
 	  <li><a href="./static/sample.pdf">Direct PDF file download</a></li>
 	</ul>
       </div>
@@ -77,9 +77,7 @@
   <div class="layer hidden" id="modal-container">
 
     <form class="modal" id="image-edit-form">
-      <span class="modal-header">
-	Image Properties <h1 class="modal-close">X</h1>
-      </span>
+      <header class="modal-header">Image Properties</header>
 
       <div class="modal-main">
 	<label>Image Name <input type="text" name="name"></label>
@@ -90,11 +88,11 @@
 	</label>
       </div>
 
-      <div class="modal-footer">
+      <footer class="modal-footer">
 	<button name="delete" type="" class="left">Delete</button>
 	<button name="cancel">Cancel</button>
 	<button type="submit">Save</button>
-      </div>
+      </footer>
     </form>
 
   </div>
