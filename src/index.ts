@@ -318,11 +318,10 @@ window.addEventListener("load", () => {
   document.getElementById("select-real-view").onchange    = handleViewChange;
   document.getElementById("select-imposed-view").onchange = handleViewChange;
 
+  /*
   document.getElementById("load-sample-doc").onclick = function () {
-    /*
-       Download a sample file, a zip of images, load it, and display the
-       contents.
-    */
+     // Download a sample file, a zip of images, load it, and display the
+     // contents.
 
     document.querySelector("#content-modal").classList.remove("hidden");
 
@@ -354,6 +353,7 @@ window.addEventListener("load", () => {
 	document.querySelector("#content-modal").classList.add("hidden");
       });
   };
+  */
 
 
   document.getElementById("load-sample-pdf").onclick = function () {

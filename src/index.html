@@ -9,7 +9,7 @@
 <body>
 
   <div class="controls">
-    <label for="upload">Upload images/zip</label>
+    <label for="upload">Import images/zip</label>
     <input autocomplete="off" type="file" id="upload" onchange="uploaderHook(this)" accept="image/*,application/zip" multiple />
     <br/>
 
@@ -40,7 +40,7 @@
     <template id="page-list-item-template">
       <li>
 	<button class="page-name"></button>
-	<input class="page-selected" type="checkbox"/></input>
+	<!-- <input class="page-selected" type="checkbox"/></input> -->
       </li>
     </template>
 
@@ -52,15 +52,13 @@
     <div id="pages-welcome">
       <h2>Drag image or zip files here to impose pages.</h2>
       <div>
-	<h3>Or try these sample documents instead instead!  </h3>
+	<h3>Or try the Web Imposition manual instead instead!</h3>
 	<p>
-	Either load them in-browser, or download the files themselves
-	to drag-and-drop them into this window from your downloads
+	Either load it in-browser, or download the file itself
+	and drag-and-drop it into this window from your downloads
 	folder.
 	</p>
 	<ul>
-	  <li><a id="load-sample-doc" href="javascript:;">Load .zip file (in-browser)</a></li>
-	  <li><a href="./static/sample.zip">Direct .zip file download</a></li>
 	  <li><a id="load-sample-pdf" href="javascript:;">Load PDF (in-browser)</a></li>
 	  <li><a href="./static/sample.pdf">Direct PDF file download</a></li>
 	</ul>
