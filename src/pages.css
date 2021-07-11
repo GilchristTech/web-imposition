@@ -73,8 +73,11 @@
 
 .pages {
   display: flex;
-  flex-direction: column;
+  overflow: scroll;
+  flex-direction: row;
+  flex-wrap: wrap;
   align-items: center;
+  justify-content: center;
 }
 
 @media print {
@@ -97,5 +100,6 @@
   .pages {
     display: block;
     background: white;
+    overflow: visible;
   }
 }

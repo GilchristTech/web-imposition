@@ -1,13 +1,20 @@
 * { box-sizing: border-box; }
 
+:root {
+  --controls-width: 300px;
+  --content-width:  calc(100vw - var(--controls-width));
+}
+
 body {
   max-width: 100vw;
   height: 100vh;
   margin: 0;
 
+  /*
   display: grid;
-  grid-template-columns: [controls] 300px [pages] auto;
+  grid-template-columns: [controls] var(--controls-width) [pages] auto;
   grid-template-rows:    [controls pages] auto;
+  */
 
   font-family: Sans-Serif;
 
@@ -21,7 +28,6 @@ body {
   opacity: 0 !important;
 }
 
-
 .scroll {
     overflow-y: scroll;
     height: 100%;
@@ -29,9 +35,16 @@ body {
 }
 
 .controls {
+    position: fixed;
+    min-height: 100vh;
+    width: var(--controls-width);
+    top: 0;
+    left: 0;
+    bottom: 0;
+
     background:    #eee;
     padding:       1em;
-    grid-area: controls;
+
     box-shadow: #0004 3px 0px 5px;
     z-index: 1;
     border-radius: 2px;
@@ -39,8 +52,18 @@ body {
 }
 
 #main-content {
-  grid-area: pages;
+  position: relative;
+  top: 0;
+  bottom: 0;
+  min-height: 100vh;
+  width: calc(100% - var(--controls-width));
+  left: var(--controls-width);
 } 
+
+#main-content > * {
+  position: absolute;
+  top: 0; bottom: 0; left: 0; right: 0;
+}
 
 input[type="checkbox"],
 input[type="checkbox"] + label {
@@ -112,7 +135,7 @@ ol.pages-list li.selected {
   color: white;
 }
 
-body > .scroll {
+body > #main-content {
   grid-area: pages;
 }
 
@@ -238,9 +261,9 @@ form.modal label > input[type="checkbox"] {
 #pages-welcome {
   height: 100%;
   display: flex;
-  align-items: center;
   flex-direction: column;
   justify-content: center;
+  align-items: center;
   color: #666;
 }
 
@@ -256,9 +279,11 @@ form.modal label > input[type="checkbox"] {
 }
 
 #content-modal {
-  position: absolute;
   background:#0004;
-  top: 0; right: 0; bottom: 0; left: 0;
+  /*
+  min-height: 100%;
+  width: 100%;
+  */
 
   display: flex;
   flex-direction: column;
@@ -275,6 +300,10 @@ form.modal label > input[type="checkbox"] {
   /*
     For print media, hide the interface
   */
+
+  :root {
+    --controls-width: 0px;
+  }
 
   body      {
     display: block;
