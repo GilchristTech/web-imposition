@@ -229,7 +229,7 @@ function addEvent (listener : EventTarget, eventName: string) : (h:EventHandler)
 
 
 function uploaderHook (uploader: HTMLInputElement) : Promise<void> {
-  return uploadFiles(uploader.files);
+  return window.contentTask( uploadFiles(uploader.files) );
 }
 
 
@@ -315,7 +315,15 @@ window.addEventListener("load", () => {
 
   window.content_spinner = new Spinner(<HTMLElement> document.querySelector("#content-modal .spinner-ring"));
   window.contentTask = function( task : Promise<any> ) : Promise<any> {
+    const modal = document.querySelector("#content-modal");
+
+    modal.classList.remove("hidden");
+
     return window.content_spinner.task(task).then( (value) => {
+      if (window.content_spinner.num_tasks == 0) {
+	modal.classList.add("hidden");
+      }
+
       return value;
     });
   };
