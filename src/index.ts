@@ -91,6 +91,27 @@ function processPDFContents (pdf: PDFDocument) : Promise<ImpositionImage[]> {
 }
 
 
+function processPDFFile (file: File) : Promise<ImpositionImage[]> {
+  return new Promise<ImpositionImage[]>( (resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = function (event) {
+      const target = <FileReader> event.target;
+
+      PDFJS.getDocument( new Uint8Array(<ArrayBuffer> target.result))
+      .promise
+      .then( processPDFContents )
+      .then( pages => {
+	resolve(pages);
+      })
+      
+    }
+
+    reader.readAsArrayBuffer(file)
+  });
+}
+
+
 function processImage (file : File, refresh=true) : Promise<ImpositionImage> {
   return ImpositionImage.fromURL(
     URL.createObjectURL(file)
@@ -108,7 +129,7 @@ function processFile (file: File) : Promise<ImpositionImage|ImpositionImage[]> {
       return processZip(file);
 
     case "application/pdf":
-      break; // TODO return processPDF(file);
+      return processPDFFile(file);
 
     default:
       if (file.type.startsWith("image/")) {
@@ -126,8 +147,27 @@ function processFile (file: File) : Promise<ImpositionImage|ImpositionImage[]> {
 function uploadFiles (files: any) : Promise<void> {
   return Promise.all(
     Array.from(files).map(processFile)
-  ).then( (result_sets: Array<ImpositionImage[]>)=> {
-    book.images = (<any> book.images).concat(result_sets);
+  ).then(
+    (result_sets) => {
+
+    // Flatten results
+
+    let pages : Array<ImpositionImage> = [];
+
+    for (let results of result_sets) {
+      if (results instanceof ImpositionImage) {
+	pages.push(<ImpositionImage> results);
+      }
+      else {
+	pages = pages.concat(<ImpositionImage[]> results);
+      }
+    }
+
+
+    return pages;
+  })
+  .then( (pages: Array<ImpositionImage>) => {
+    book.images = book.images.concat(pages);
     refresh();
     
     // Enter real view
