@@ -72,10 +72,7 @@ function processZipContents (zip: JSZip) : Promise<ImpositionImage[]> {
     )
   });
   
-  return Promise.all( promises ).then( (images: any) => {
-      book.images = <ImpositionImage[]> images;
-      return images;
-  });
+  return <Promise<ImpositionImage[]>> Promise.all( promises );
 }
 
 
@@ -95,14 +92,9 @@ function processPDFContents (pdf: PDFDocument) : Promise<ImpositionImage[]> {
 
 
 function processImage (file : File, refresh=true) : Promise<ImpositionImage> {
-  const book_image_index = book.images.length;
-
   return ImpositionImage.fromURL(
     URL.createObjectURL(file)
-  ).then( (image: ImpositionImage) => {
-    book.images[book_image_index] = image;
-    return image;
-  });
+  );
 }
 
 
@@ -135,6 +127,7 @@ function uploadFiles (files: any) : Promise<void> {
   return Promise.all(
     Array.from(files).map(processFile)
   ).then( (result_sets: Array<ImpositionImage[]>)=> {
+    book.images = (<any> book.images).concat(result_sets);
     refresh();
     
     // Enter real view
