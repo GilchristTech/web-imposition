@@ -33,7 +33,9 @@ export class ImagePropertiesContext {
 
 	constructor (image : ImpositionImage) {
 		this.image     = image;
-		this.new_image = <ImpositionImage> { ...image };
+
+		// Shallow copy image while retaining type
+		this.new_image = Object.assign(new ImpositionImage(), image);
 	}
 
 	refreshFormValues (form : ImagePropertiesFormElement) {
@@ -42,12 +44,33 @@ export class ImagePropertiesContext {
 		*/
 
 		form.elements['name'].value = this.new_image.name;
-		form.elements['page-spread'].checked; 
-		form.elements['crease-margin'].value = this.image.crease_margin?.toString() ?? "";
+		form.elements['page-spread'].checked = !this.new_image.is_single_page; 
+		// form.elements['crease-margin'].value = this.image.crease_margin?.toString() ?? "";
 
 		// Show form
 		form.classList.remove("hidden");
 		document.querySelector("#modal-container").classList.remove("hidden");
+	}
+
+	formSave (form: ImagePropertiesFormElement) {
+		this.new_image.name           = form.elements['name'].value;
+		this.new_image.is_single_page = !form.elements['page-spread'].checked;
+
+		// if (form.elements['crease-margin'].value == "") {
+		// 	this.new_image.crease_margin  = null;
+		// }
+		// else {
+		// 	this.new_image.crease_margin  = parseInt(form.elements['crease-margin'].value);
+		// }
+
+
+		// If the page spread box was changed, create or modify new
+		// elements for that page by triggering the ImpositionImage
+		// onload hook
+
+		if (this.image.is_single_page != this.new_image.is_single_page) {
+			this.new_image.rebuildElements();
+		}
 	}
 
 	bindForm (form : ImagePropertiesFormElement) : Promise<ImpositionImage> {
@@ -61,16 +84,9 @@ export class ImagePropertiesContext {
 			form.onsubmit = (e : Event) => {
 				e.preventDefault();
 
-				this.new_image.name           = form.elements['name'].value;
-				this.new_image.is_single_page = !form.elements['page-spread'].checked;
-
-				if (form.elements['crease-margin'].value == "") {
-					this.new_image.crease_margin  = null;
-				}
-				else {
-					this.new_image.crease_margin  = parseInt(form.elements['crease-margin'].value);
-				}
-
+				this.formSave(form);
+				
+				// Close modal
 
 				form.classList.add("hidden");
 				document.querySelector("#modal-container").classList.add("hidden");

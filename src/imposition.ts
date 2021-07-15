@@ -102,21 +102,24 @@ export class ImpositionImage {
     });
   }
 
-  onload (e: Event) : void {
-    this.loaded = true;
-
-    if (this.element.width > this.element.height) {
+  rebuildElements () {
+    if (this.is_single_page) {
+      this.element.className = "single";
+      this.elementSecondary  = null;
+    }
+    else {
       this.element.className = "double";
-      this.is_single_page = false;
 
       const right_img     = this.elementSecondary = document.createElement("img");
       right_img.src       = this.src;
       right_img.className = "double";
     }
-    else {
-      this.element.className = "single";
-      this.is_single_page = true;
-    }
+  }
+
+  onload (e?: Event) : void {
+    this.loaded = true;
+    this.is_single_page = this.element.width < this.element.height;
+    this.rebuildElements();
   }
 }
 

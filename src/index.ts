@@ -262,8 +262,8 @@ function refresh() : void {
 	return;
       }
 
-      // Rename 
-      page_name_element.innerText = new_image.name;
+      book.images[i] = new_image;
+      refresh();
     });
 
     pages_list.appendChild(page_list_element);
