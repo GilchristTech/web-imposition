@@ -138,6 +138,7 @@ function uploadFiles (files: any) : Promise<void> {
     refresh();
     
     // Enter real view
+    enableViews();
     document.getElementById("select-real-view").click();
   });
 }
