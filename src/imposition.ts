@@ -1,8 +1,8 @@
-import  * as PDFJS from 'pdfjs-dist/webpack';
+import  * as PDFJS from 'pdfjs-dist';
 
 import {
   PDFPageProxy, PDFDocumentProxy
-} from 'pdfjs-dist/webpack';
+} from 'pdfjs-dist';
 
 import './pages.css';
 import './image_edit_modal';

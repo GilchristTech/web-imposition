@@ -1,6 +1,6 @@
 import * as Imposition from       './imposition';
 import * as      JSZip from              'jszip';
-import * as      PDFJS from 'pdfjs-dist/webpack';
+import * as      PDFJS from         'pdfjs-dist';
 import  { Spinner }    from  './loading-spinner';
 
 import './interface.css';
@@ -11,7 +11,7 @@ import { ImagePropertiesContext } from  './image_edit_modal';
 
 import {
   PDFPageProxy, PDFDocumentProxy
-} from 'pdfjs-dist/webpack';
+} from 'pdfjs-dist';
 
 // Shorten the names of PDF proxy objects for the sake of brevity in other
 // declarations.
@@ -101,7 +101,7 @@ function processPDFFile (file: File) : Promise<ImpositionImage[]> {
       PDFJS.getDocument( new Uint8Array(<ArrayBuffer> target.result))
       .promise
       .then( processPDFContents )
-      .then( pages => {
+      .then( (pages: Array<ImpositionImage>) => {
 	resolve(pages);
       })
       
@@ -405,13 +405,13 @@ window.addEventListener("load", () => {
    
     window.contentTask(
       PDFJS.getDocument( "./static/sample.pdf" ).promise
-      .then( (v) => {
+      .then( (v: any) => {
 	document.querySelector("#content-modal").classList.remove("hidden");
 	return v;
       })
       .then( processPDFContents )
       .then(
-	pages => {
+	(pages: Array<ImpositionImage>) => {
 	  // Assign names to each image
 	  
 	  for (let i = 0; i < pages.length; i++) {
@@ -427,7 +427,7 @@ window.addEventListener("load", () => {
 	  document.getElementById("select-real-view").click();
 	},
 
-	error => alert(`An error occured in loading the sample document: ${error}`)
+	(error: any) => alert(`An error occured in loading the sample document: ${error}`)
       )
       .finally( () => {
 	document.querySelector("#content-modal").classList.add("hidden");
